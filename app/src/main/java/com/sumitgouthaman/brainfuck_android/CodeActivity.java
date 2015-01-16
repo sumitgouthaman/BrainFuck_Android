@@ -1,5 +1,6 @@
 package com.sumitgouthaman.brainfuck_android;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
@@ -21,12 +22,12 @@ public class CodeActivity extends ActionBarActivity {
         setContentView(R.layout.activity_code);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlaceholderFragment())
+                    .add(R.id.container, new CodeFragment())
                     .commit();
         }
     }
 
-
+    /*
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -48,11 +49,12 @@ public class CodeActivity extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
+    */
 
     /**
      * A placeholder fragment containing a simple view.
      */
-    public static class PlaceholderFragment extends Fragment {
+    public static class CodeFragment extends Fragment {
 
         final String TAG = getClass().getSimpleName();
 
@@ -63,7 +65,7 @@ public class CodeActivity extends ActionBarActivity {
                 buttonPrintChar, buttonReadChar;
         Button buttonNext, buttonSpace, buttonMoveCursorLeft, buttonMoveCursorRight, buttonDel;
 
-        public PlaceholderFragment() {
+        public CodeFragment() {
         }
 
         @Override
@@ -174,7 +176,10 @@ public class CodeActivity extends ActionBarActivity {
                 public void onClick(View v) {
                     String currentCode = codeView.getText().toString();
                     String pureCode = pureCode(currentCode);
-                    Log.d(TAG, pureCode);
+                    //Log.d(TAG, pureCode);
+                    Intent intent = new Intent(getActivity(), InputOutputActivity.class);
+                    intent.putExtra(InputOutputActivity.InputOutputFragment.KEY_PURECODE, pureCode);
+                    startActivity(intent);
                 }
             });
 
