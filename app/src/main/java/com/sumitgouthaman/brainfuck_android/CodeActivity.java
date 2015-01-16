@@ -61,7 +61,7 @@ public class CodeActivity extends ActionBarActivity {
                 buttonIncrement, buttonDecrement,
                 buttonStartBracket, buttonStopBracket,
                 buttonPrintChar, buttonReadChar;
-        Button buttonNext, buttonSpace, buttonMoveCursorLeft, buttonMoveCursorRight;
+        Button buttonNext, buttonSpace, buttonMoveCursorLeft, buttonMoveCursorRight, buttonDel;
 
         public PlaceholderFragment() {
         }
@@ -80,6 +80,7 @@ public class CodeActivity extends ActionBarActivity {
             buttonPrintChar = (Button) rootView.findViewById(R.id.button_print_char);
             buttonReadChar = (Button) rootView.findViewById(R.id.button_read_char);
             buttonSpace = (Button) rootView.findViewById(R.id.button_space);
+            buttonDel = (Button) rootView.findViewById(R.id.button_del);
             buttonMoveCursorLeft = (Button) rootView.findViewById(R.id.button_move_left);
             buttonMoveCursorRight = (Button) rootView.findViewById(R.id.button_move_right);
             buttonNext = (Button) rootView.findViewById(R.id.button_next);
@@ -147,6 +148,13 @@ public class CodeActivity extends ActionBarActivity {
                 }
             });
 
+            buttonDel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    backSpace();
+                }
+            });
+
             buttonMoveCursorLeft.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -196,7 +204,7 @@ public class CodeActivity extends ActionBarActivity {
                 int preStringLen = preString.length();
                 if (preStringLen == 0) return;
                 char last = preString.charAt(preStringLen - 1);
-                preString = preString.substring(0, preStringLen);
+                preString = preString.substring(0, preStringLen - 1);
                 postString = last + postString;
             } else if (direction == Constants.Direction.RIGHT) {
                 int postStringLen = postString.length();
@@ -205,6 +213,23 @@ public class CodeActivity extends ActionBarActivity {
                 postString = postString.substring(1);
                 preString = preString + first;
             }
+            currentCode = preString + '|' + postString;
+            codeView.setText(currentCode);
+        }
+
+        private void backSpace(){
+            String currentCode = codeView.getText().toString();
+            int cursorPos = currentCode.indexOf(Constants.cursor);
+            String preString = currentCode.substring(0, cursorPos);
+            int preStringLen = preString.length();
+            if (preStringLen == 0) return;
+            String postString;
+            if (currentCode.indexOf(Constants.cursor) == currentCode.length() - 1) {
+                postString = "";
+            } else {
+                postString = currentCode.substring(cursorPos + 1);
+            }
+            preString = preString.substring(0, preStringLen - 1);
             currentCode = preString + '|' + postString;
             codeView.setText(currentCode);
         }
