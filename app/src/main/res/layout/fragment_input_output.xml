@@ -67,7 +67,7 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="@string/blank"
-                android:id="@+id/textView4" />
+                android:id="@+id/textView_output" />
 
         </LinearLayout>
     </LinearLayout>
