@@ -1,6 +1,7 @@
 package com.sumitgouthaman.brainfuck_android;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
@@ -27,7 +28,16 @@ public class CodeActivity extends ActionBarActivity {
         }
     }
 
-    /*
+    @Override
+    protected void onStop() {
+        super.onStop();
+        SharedPreferences sharedPreferences = getSharedPreferences("BrainFuck", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear();
+        editor.commit();
+    }
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -43,13 +53,15 @@ public class CodeActivity extends ActionBarActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_about) {
+            Intent intent = new Intent(this, About.class);
+            startActivity(intent);
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
-    */
+
 
     /**
      * A placeholder fragment containing a simple view.

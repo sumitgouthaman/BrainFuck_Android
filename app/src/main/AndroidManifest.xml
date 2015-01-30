@@ -24,6 +24,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.sumitgouthaman.brainfuck_android.CodeActivity" />
         </activity>
+        <activity
+            android:name=".About"
+            android:label="@string/title_activity_about"
+            android:parentActivityName=".CodeActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.sumitgouthaman.brainfuck_android.CodeActivity" />
+        </activity>
     </application>
 
 </manifest>

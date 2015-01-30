@@ -1,6 +1,7 @@
 package com.sumitgouthaman.brainfuck_android;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -64,6 +65,7 @@ public class InputOutputActivity extends ActionBarActivity {
 
         final static String KEY_PURECODE = "PURECODE";
         final String TAG = getClass().getSimpleName();
+        final static String KEY_INPUT = "INPUT";
 
         String code = null;
         Activity activity = null;
@@ -98,7 +100,21 @@ public class InputOutputActivity extends ActionBarActivity {
                 }
             });
 
+            SharedPreferences sharedPreferences = getActivity().getSharedPreferences("BrainFuck", MODE_PRIVATE);
+            String inputStr = sharedPreferences.getString(KEY_INPUT, "");
+            editText_Input.setText(inputStr);
+
             return rootView;
+        }
+
+        @Override
+        public void onStop() {
+            super.onStop();
+            String inputStr = editText_Input.getText().toString();
+            SharedPreferences sharedPreferences = getActivity().getSharedPreferences("BrainFuck", MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString(KEY_INPUT, inputStr);
+            editor.commit();
         }
     }
 }
