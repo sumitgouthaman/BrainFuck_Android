@@ -2,13 +2,11 @@ package com.sumitgouthaman.brainfuck_android;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -17,8 +15,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.sumitgouthaman.brainfuck_android.brainfuck_lang.BrainfuckInterpreter;
-
-import java.util.Arrays;
+import com.sumitgouthaman.brainfuck_android.brainfuck_lang.InputException;
+import com.sumitgouthaman.brainfuck_android.brainfuck_lang.ProgramException;
+import com.sumitgouthaman.brainfuck_android.brainfuck_lang.TapeException;
 
 
 public class InputOutputActivity extends ActionBarActivity {
@@ -95,8 +94,22 @@ public class InputOutputActivity extends ActionBarActivity {
                 @Override
                 public void onClick(View v) {
                     String inputStr = editText_Input.getText().toString();
-                    String output = BrainfuckInterpreter.interpret(code, inputStr);
-                    textView_Output.setText(output);
+                    try {
+                        String output = BrainfuckInterpreter.interpret(code, inputStr);
+                        textView_Output.setText(output);
+                    } catch (InputException e) {
+                        Toast.makeText(activity, activity.getString(R.string.ran_out_of_input), Toast.LENGTH_SHORT).show();
+                    } catch (ProgramException te) {
+                        if (te.startOfCode)
+                            Toast.makeText(activity, activity.getString(R.string.ran_past_start_of_program), Toast.LENGTH_SHORT).show();
+                        else
+                            Toast.makeText(activity, activity.getString(R.string.ran_past_end_of_program), Toast.LENGTH_SHORT).show();
+                    } catch (TapeException te) {
+                        if (te.startOfTape)
+                            Toast.makeText(activity, activity.getString(R.string.ran_past_start_of_tape), Toast.LENGTH_SHORT).show();
+                        else
+                            Toast.makeText(activity, activity.getString(R.string.ran_past_end_of_tape), Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
 

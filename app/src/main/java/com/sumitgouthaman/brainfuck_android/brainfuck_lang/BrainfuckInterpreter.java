@@ -8,7 +8,7 @@ import java.util.ArrayList;
  * Created by sumit on 1/16/15.
  */
 public class BrainfuckInterpreter {
-    public static byte[] interpret(String code, byte[] input) {
+    public static byte[] interpret(String code, byte[] input) throws InputException, ProgramException, TapeException {
         int inputPos = 0;
         ArrayList<Byte> outputList = new ArrayList<Byte>();
         char[] program = code.toCharArray();
@@ -23,10 +23,16 @@ public class BrainfuckInterpreter {
                 case Constants.left:
                     cellPos--;
                     progPos++;
+                    if(cellPos < 0) {
+                        throw new TapeException(true);
+                    }
                     break;
                 case Constants.right:
                     cellPos++;
                     progPos++;
+                    if(cellPos >= cells.length){
+                        throw new TapeException(false);
+                    }
                     break;
                 case Constants.increment:
                     cells[cellPos]++;
@@ -41,6 +47,9 @@ public class BrainfuckInterpreter {
                     progPos++;
                     break;
                 case Constants.readChar:
+                    if (inputPos >= input.length) {
+                        throw new InputException();
+                    }
                     cells[cellPos] = input[inputPos++];
                     progPos++;
                     break;
@@ -48,6 +57,9 @@ public class BrainfuckInterpreter {
                     if (cells[cellPos] == 0) {
                         while (program[progPos] != Constants.stopBracket) {
                             progPos++;
+                            if(progPos >= program.length) {
+                                throw new ProgramException(false);
+                            }
                         }
                         progPos++;
                     } else {
@@ -58,6 +70,9 @@ public class BrainfuckInterpreter {
                     if (cells[cellPos] != 0) {
                         while (program[progPos] != Constants.startBracket) {
                             progPos--;
+                            if(progPos < 0) {
+                                throw new ProgramException(true);
+                            }
                         }
                         progPos++;
                     } else {
@@ -74,7 +89,7 @@ public class BrainfuckInterpreter {
         return output;
     }
 
-    public static String interpret(String code, String input) {
+    public static String interpret(String code, String input) throws InputException, ProgramException, TapeException {
         byte[] inputBytes = input.getBytes();
         byte[] output = interpret(code, inputBytes);
         return new String(output);

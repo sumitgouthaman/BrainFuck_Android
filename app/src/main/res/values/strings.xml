@@ -32,5 +32,10 @@
     <string name="contact_val">\@sumitgouthaman\nhttp://twitter.com/sumitgouthaman</string>
     <string name="other_projects">Other Projects</string>
     <string name="other_projects_val">http://github.com/sumitgouthaman</string>
+    <string name="ran_out_of_input">Ran out of inputs!</string>
+    <string name="ran_past_start_of_tape">Ran past start of tape!</string>
+    <string name="ran_past_end_of_tape">Ran past end of tape! (max length: 30000)</string>
+    <string name="ran_past_start_of_program">Ran past start of program!</string>
+    <string name="ran_past_end_of_program">Ran past end of program!</string>
 
 </resources>
