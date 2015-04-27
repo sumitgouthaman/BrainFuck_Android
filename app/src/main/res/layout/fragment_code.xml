@@ -159,7 +159,14 @@
                 android:layout_height="wrap_content"
                 android:text="@string/space"
                 android:id="@+id/button_space"
-                android:layout_weight="2"/>
+                android:layout_weight="1"/>
+            <Button
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/paste"
+                android:id="@+id/button_paste"
+                android:layout_weight="1"/>
 
             <Button
                 style="?android:attr/buttonStyleSmall"

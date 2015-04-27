@@ -37,5 +37,8 @@
     <string name="ran_past_end_of_tape">Ran past end of tape! (max length: 30000)</string>
     <string name="ran_past_start_of_program">Ran past start of program!</string>
     <string name="ran_past_end_of_program">Ran past end of program!</string>
+    <string name="paste"><![CDATA[<Paste>]]></string>
+    <string name="no_text_in_clipboard">No text in clipboard</string>
+    <string name="pasted_from_clipboard">Pasted code from clipboard</string>
 
 </resources>

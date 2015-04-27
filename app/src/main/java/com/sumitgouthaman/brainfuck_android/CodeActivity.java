@@ -1,5 +1,9 @@
 package com.sumitgouthaman.brainfuck_android;
 
+import android.content.ClipData;
+import android.content.ClipDescription;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -13,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 public class CodeActivity extends ActionBarActivity {
@@ -76,6 +81,7 @@ public class CodeActivity extends ActionBarActivity {
                 buttonStartBracket, buttonStopBracket,
                 buttonPrintChar, buttonReadChar;
         Button buttonNext, buttonSpace, buttonMoveCursorLeft, buttonMoveCursorRight, buttonDel;
+        Button buttonPaste;
 
         public CodeFragment() {
         }
@@ -98,6 +104,7 @@ public class CodeActivity extends ActionBarActivity {
             buttonMoveCursorLeft = (Button) rootView.findViewById(R.id.button_move_left);
             buttonMoveCursorRight = (Button) rootView.findViewById(R.id.button_move_right);
             buttonNext = (Button) rootView.findViewById(R.id.button_next);
+            buttonPaste = (Button) rootView.findViewById(R.id.button_paste);
 
             buttonLeft.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -180,6 +187,28 @@ public class CodeActivity extends ActionBarActivity {
                 @Override
                 public void onClick(View v) {
                     moveCursor(Constants.Direction.RIGHT);
+                }
+            });
+
+            buttonPaste.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
+                    if (!(clipboard.hasPrimaryClip())) {
+                        Toast.makeText(getActivity(), getString(R.string.no_text_in_clipboard), Toast.LENGTH_SHORT).show();
+                    } else if (!(clipboard.getPrimaryClipDescription().hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN))){
+                        Toast.makeText(getActivity(), getString(R.string.no_text_in_clipboard), Toast.LENGTH_SHORT).show();
+                    } else {
+                        ClipData.Item item = clipboard.getPrimaryClip().getItemAt(0);
+                        String pasteData = item.getText().toString();
+                        String currentCode = codeView.getText().toString();
+                        int cursorPos = currentCode.indexOf(Constants.cursor);
+                        String preString = currentCode.substring(0, cursorPos);
+                        String postString = currentCode.substring(cursorPos);
+                        currentCode = preString + " " + pasteData + " " + postString;
+                        codeView.setText(currentCode);
+                        Toast.makeText(getActivity(), getString(R.string.pasted_from_clipboard), Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
 
