@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -40,7 +41,7 @@ public class InputOutputActivity extends ActionBarActivity {
         getMenuInflater().inflate(R.menu.menu_input_output, menu);
         return true;
     }
-
+    */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -48,6 +49,10 @@ public class InputOutputActivity extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
+        if(id == android.R.id.home) {
+            finish();
+            return true;
+        }
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
@@ -55,7 +60,6 @@ public class InputOutputActivity extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
-    */
 
     /**
      * A placeholder fragment containing a simple view.
