@@ -1,9 +1,11 @@
 package com.sumitgouthaman.brainfuck_android;
 
+import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -66,8 +68,49 @@ public class CodeActivity extends ActionBarActivity {
             startActivity(intent);
             return true;
         }
+        if(id == R.id.action_save) {
+            EditText codeView = (EditText) findViewById(R.id.textView_codeView);
+            String text = codeView.getText().toString();
+            if(text != "") {
+                filenameBox(text);
+                return true;
+            } else {
+                Toast.makeText(getApplicationContext(), "No Text Error", Toast.LENGTH_SHORT).show();
+            }
+        }
+        if(id == R.id.action_open) {
+
+        }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void filenameBox(String text) {
+        LayoutInflater li = LayoutInflater.from(getApplicationContext());
+        final View promptView = li.inflate(R.layout.file_dialog, null);
+
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setView(promptView);
+
+        final EditText userInput = (EditText) promptView.findViewById(R.id.filename_input);
+        alertDialogBuilder.setCancelable(false).setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                EditText codeView = (EditText) findViewById(R.id.textView_codeView);
+                FileHandler fh = new FileHandler(getApplicationContext());
+                fh.saveFile(codeView.getText().toString(), userInput.getText().toString() + ".txt");
+                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(userInput.getWindowToken(), 0);
+            }
+        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog,int id) {
+                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(userInput.getWindowToken(), 0);
+                dialog.cancel();
+            }
+        });
+
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
     }
 
 
@@ -79,6 +122,9 @@ public class CodeActivity extends ActionBarActivity {
         final String TAG = getClass().getSimpleName();
 
         int cursorPos = 0;
+
+        boolean leftHeld = false;
+        boolean rightHeld = false;
 
         EditText codeView;
         Button buttonLeft, buttonRight,
@@ -94,8 +140,7 @@ public class CodeActivity extends ActionBarActivity {
         @Override
         public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
-            final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
+
         }
 
         @Override
@@ -210,6 +255,41 @@ public class CodeActivity extends ActionBarActivity {
                     moveCursor(Constants.Direction.RIGHT);
                 }
             });
+
+            //Hold support later
+            /*buttonMoveCursorLeft.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    switch(event.getAction()) {
+                        case MotionEvent.ACTION_DOWN:
+                            leftHeld = true;
+
+                            return false;
+                        case MotionEvent.ACTION_UP:
+                            leftHeld = false;
+                            return false;
+                    }
+                    return false;
+                }
+            });*/
+
+            /*buttonMoveCursorRight.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    switch(event.getAction()) {
+                        case MotionEvent.ACTION_DOWN:
+                            rightHeld = true;
+                            while(leftHeld) {
+                                moveCursor(Constants.Direction.RIGHT);
+                            }
+                            return true;
+                        case MotionEvent.ACTION_UP:
+                            rightHeld = false;
+                            return true;
+                    }
+                    return false;
+                }
+            });*/
 
             buttonPaste.setOnClickListener(new View.OnClickListener() {
                 @Override

@@ -40,5 +40,11 @@
     <string name="paste"><![CDATA[<Paste>]]></string>
     <string name="no_text_in_clipboard">No text in clipboard</string>
     <string name="pasted_from_clipboard">Pasted code from clipboard</string>
+    <string name="action_save">Save</string>
+    <string name="please_input_filename">Please Input Filename:</string>
+    <string name="about_maintain">Being Maintained by</string>
+    <string name="about_maintainer">David Baines</string>
+    <string name="about_maintainer_email">david.peter.baines@gmail.com</string>
+    <string name="action_open">Open...</string>
 
 </resources>
