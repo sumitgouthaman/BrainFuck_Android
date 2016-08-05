@@ -13,9 +13,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -75,7 +78,9 @@ public class CodeActivity extends ActionBarActivity {
 
         final String TAG = getClass().getSimpleName();
 
-        TextView codeView;
+        int cursorPos = 0;
+
+        EditText codeView;
         Button buttonLeft, buttonRight,
                 buttonIncrement, buttonDecrement,
                 buttonStartBracket, buttonStopBracket,
@@ -87,10 +92,17 @@ public class CodeActivity extends ActionBarActivity {
         }
 
         @Override
+        public void onActivityCreated(Bundle savedInstanceState) {
+            super.onActivityCreated(savedInstanceState);
+            final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
+        }
+
+        @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_code, container, false);
-            codeView = (TextView) rootView.findViewById(R.id.textView_codeView);
+            codeView = (EditText) rootView.findViewById(R.id.textView_codeView);
             buttonLeft = (Button) rootView.findViewById(R.id.button_left);
             buttonRight = (Button) rootView.findViewById(R.id.button_right);
             buttonIncrement = (Button) rootView.findViewById(R.id.button_increment);
@@ -105,6 +117,15 @@ public class CodeActivity extends ActionBarActivity {
             buttonMoveCursorRight = (Button) rootView.findViewById(R.id.button_move_right);
             buttonNext = (Button) rootView.findViewById(R.id.button_next);
             buttonPaste = (Button) rootView.findViewById(R.id.button_paste);
+
+            //This purposefully doesn't do anything, it hopefully will stop the keyboard from popping up
+            View.OnTouchListener otl = new View.OnTouchListener() {
+                public boolean onTouch(View v, MotionEvent event) {
+                    return true;
+                }
+            };
+
+            codeView.setOnTouchListener(otl);
 
             buttonLeft.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -229,55 +250,50 @@ public class CodeActivity extends ActionBarActivity {
 
         private void insertAtCursor(char token) {
             String currentCode = codeView.getText().toString();
-            int cursorPos = currentCode.indexOf(Constants.cursor);
-            String preString = currentCode.substring(0, cursorPos);
-            String postString = currentCode.substring(cursorPos);
+            String preString;
+            try {
+                preString = currentCode.substring(0, cursorPos);
+            } catch(Exception e) {
+                preString = "";
+            }
+            String postString;
+            try {
+                postString = currentCode.substring(cursorPos, codeView.length());
+            } catch (Exception e) {
+                postString = "";
+            }
             currentCode = preString + token + postString;
+            Log.d("Brainfuck", "Text: '" + currentCode + "' Cursor: " + cursorPos);
             codeView.setText(currentCode);
+            cursorPos++;
+            codeView.setSelection(cursorPos);
         }
 
         private void moveCursor(Constants.Direction direction) {
-            String currentCode = codeView.getText().toString();
-            int cursorPos = currentCode.indexOf(Constants.cursor);
-            String preString = currentCode.substring(0, cursorPos);
-            String postString;
-            if (currentCode.indexOf(Constants.cursor) == currentCode.length() - 1) {
-                postString = "";
-            } else {
-                postString = currentCode.substring(cursorPos + 1);
+            if (direction == Constants.Direction.LEFT && cursorPos != 0) {
+                cursorPos--;
+                codeView.setSelection(cursorPos);
+            } else if (direction == Constants.Direction.RIGHT && codeView.getText().length() != cursorPos) {
+                cursorPos++;
+                codeView.setSelection(cursorPos);
             }
-            if (direction == Constants.Direction.LEFT) {
-                int preStringLen = preString.length();
-                if (preStringLen == 0) return;
-                char last = preString.charAt(preStringLen - 1);
-                preString = preString.substring(0, preStringLen - 1);
-                postString = last + postString;
-            } else if (direction == Constants.Direction.RIGHT) {
-                int postStringLen = postString.length();
-                if (postStringLen == 0) return;
-                char first = postString.charAt(0);
-                postString = postString.substring(1);
-                preString = preString + first;
-            }
-            currentCode = preString + '|' + postString;
-            codeView.setText(currentCode);
         }
 
         private void backSpace(){
-            String currentCode = codeView.getText().toString();
-            int cursorPos = currentCode.indexOf(Constants.cursor);
-            String preString = currentCode.substring(0, cursorPos);
-            int preStringLen = preString.length();
-            if (preStringLen == 0) return;
-            String postString;
-            if (currentCode.indexOf(Constants.cursor) == currentCode.length() - 1) {
-                postString = "";
-            } else {
-                postString = currentCode.substring(cursorPos + 1);
+            if(cursorPos != 0) {
+                String currentCode = codeView.getText().toString();
+                cursorPos--;
+                String preString = currentCode.substring(0, cursorPos);
+                String postString;
+                try {
+                    postString = currentCode.substring(cursorPos + 1, codeView.length());
+                } catch (Exception e) {
+                    postString = "";
+                }
+                currentCode = preString + postString;
+                codeView.setText(currentCode);
+                codeView.setSelection(cursorPos);
             }
-            preString = preString.substring(0, preStringLen - 1);
-            currentCode = preString + '|' + postString;
-            codeView.setText(currentCode);
         }
 
         private String pureCode(String rawCode) {

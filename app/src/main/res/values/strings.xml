@@ -18,8 +18,8 @@
     <string name="next">Next</string>
     <string name="cursor">|</string>
     <string name="space">[Space]</string>
-    <string name="move_left"><![CDATA[<--]]></string>
-    <string name="move_right"><![CDATA[-->]]></string>
+    <string name="move_left">◄</string>
+    <string name="move_right">►</string>
     <string name="title_activity_input_output">Brainfuck</string>
     <string name="run">Run</string>
     <string name="del">[del]</string>
