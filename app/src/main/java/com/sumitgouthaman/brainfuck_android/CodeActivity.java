@@ -1,7 +1,8 @@
 package com.sumitgouthaman.brainfuck_android;
 
 import android.app.AlertDialog;
-import android.app.Fragment;
+//import android.app.Fragment;
+import android.app.Dialog;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ClipboardManager;
@@ -10,7 +11,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -21,10 +24,12 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
-
 public class CodeActivity extends ActionBarActivity {
+
+    String activeFile = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +72,7 @@ public class CodeActivity extends ActionBarActivity {
             startActivity(intent);
             return true;
         }
-        if(id == R.id.action_save) {
+        if(id == R.id.action_saveas) {
             EditText codeView = (EditText) findViewById(R.id.textView_codeView);
             String text = codeView.getText().toString();
             if(text != "") {
@@ -77,12 +82,55 @@ public class CodeActivity extends ActionBarActivity {
                 Toast.makeText(getApplicationContext(), "No Text Error", Toast.LENGTH_SHORT).show();
             }
         }
+        if(id == R.id.action_save) {
+            EditText codeView = (EditText) findViewById(R.id.textView_codeView);
+            String text = codeView.getText().toString();
+            if(text != "") {
+                if(activeFile == "") {
+                    filenameBox(text);
+                } else {
+                    FileHandler fh = new FileHandler(getApplicationContext());
+                    fh.saveFile(codeView.getText().toString(), activeFile);
+                }
+                return true;
+            } else {
+                Toast.makeText(getApplicationContext(), "No Text Error", Toast.LENGTH_SHORT).show();
+            }
+        }
         if(id == R.id.action_open) {
             FileHandler fh = new FileHandler(getApplicationContext());
-            String[] fileList = fh.loadFileList();
+            String[] fileList = fh.fileList();
+            if(fileList != null) {
+                openFileBox(fileList);
+            }
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void openFileBox(String[] fileList) {
+        //onClick doesn't like the parameter for some reason
+        final String[] flist = fileList;
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setTitle("Choose your File:");
+        builder.setItems(fileList, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int index) {
+                String chosenFile = flist[index];
+                FileHandler fh = new FileHandler(getApplicationContext());
+                String fileC = fh.openFile(chosenFile);
+                activeFile = chosenFile;
+
+                TextView fileMenu = (TextView) findViewById(R.id.filename_text);
+                fileMenu.setText("File Name: " + chosenFile);
+
+                CodeFragment.cursorPos = 0;
+
+                EditText codeView = (EditText) findViewById(R.id.textView_codeView);
+                codeView.setText(fileC);
+            }
+        });
+        builder.show();
     }
 
     public void filenameBox(String text) {
@@ -98,6 +146,11 @@ public class CodeActivity extends ActionBarActivity {
                 EditText codeView = (EditText) findViewById(R.id.textView_codeView);
                 FileHandler fh = new FileHandler(getApplicationContext());
                 fh.saveFile(codeView.getText().toString(), userInput.getText().toString() + ".txt");
+                activeFile = userInput.getText().toString() + ".txt";
+
+                TextView fileMenu = (TextView) findViewById(R.id.filename_text);
+                fileMenu.setText("File Name: " + userInput.getText().toString() + ".txt");
+
                 InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(userInput.getWindowToken(), 0);
             }
@@ -121,7 +174,7 @@ public class CodeActivity extends ActionBarActivity {
 
         final String TAG = getClass().getSimpleName();
 
-        int cursorPos = 0;
+        static int cursorPos = 0;
 
         boolean leftHeld = false;
         boolean rightHeld = false;
@@ -346,6 +399,7 @@ public class CodeActivity extends ActionBarActivity {
             Log.d("Brainfuck", "Text: '" + currentCode + "' Cursor: " + cursorPos);
             codeView.setText(currentCode);
             cursorPos++;
+
             codeView.setSelection(cursorPos);
         }
 

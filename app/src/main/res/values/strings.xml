@@ -46,5 +46,7 @@
     <string name="about_maintainer">David Baines</string>
     <string name="about_maintainer_email">david.peter.baines@gmail.com</string>
     <string name="action_open">Open...</string>
+    <string name="filename_text">File Name:</string>
+    <string name="menu_save_as">Save As...</string>
 
 </resources>
