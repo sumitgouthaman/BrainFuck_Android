@@ -1,6 +1,7 @@
 package com.sumitgouthaman.brainfuck_android;
 
 import android.app.AlertDialog;
+import android.app.Fragment;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ClipboardManager;
@@ -9,7 +10,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,7 +21,6 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -79,7 +78,8 @@ public class CodeActivity extends ActionBarActivity {
             }
         }
         if(id == R.id.action_open) {
-
+            FileHandler fh = new FileHandler(getApplicationContext());
+            String[] fileList = fh.loadFileList();
         }
 
         return super.onOptionsItemSelected(item);
