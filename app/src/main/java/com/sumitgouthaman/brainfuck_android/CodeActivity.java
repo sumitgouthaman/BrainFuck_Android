@@ -1,26 +1,35 @@
 package com.sumitgouthaman.brainfuck_android;
 
+import android.app.AlertDialog;
+//import android.app.Fragment;
+import android.app.Dialog;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
 public class CodeActivity extends ActionBarActivity {
+
+    String activeFile = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,8 +72,98 @@ public class CodeActivity extends ActionBarActivity {
             startActivity(intent);
             return true;
         }
+        if(id == R.id.action_saveas) {
+            EditText codeView = (EditText) findViewById(R.id.textView_codeView);
+            String text = codeView.getText().toString();
+            if(text != "") {
+                filenameBox(text);
+                return true;
+            } else {
+                Toast.makeText(getApplicationContext(), "No Text Error", Toast.LENGTH_SHORT).show();
+            }
+        }
+        if(id == R.id.action_save) {
+            EditText codeView = (EditText) findViewById(R.id.textView_codeView);
+            String text = codeView.getText().toString();
+            if(text != "") {
+                if(activeFile == "") {
+                    filenameBox(text);
+                } else {
+                    FileHandler fh = new FileHandler(getApplicationContext());
+                    fh.saveFile(codeView.getText().toString(), activeFile);
+                }
+                return true;
+            } else {
+                Toast.makeText(getApplicationContext(), "No Text Error", Toast.LENGTH_SHORT).show();
+            }
+        }
+        if(id == R.id.action_open) {
+            FileHandler fh = new FileHandler(getApplicationContext());
+            String[] fileList = fh.fileList();
+            if(fileList != null) {
+                openFileBox(fileList);
+            }
+        }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void openFileBox(String[] fileList) {
+        //onClick doesn't like the parameter for some reason
+        final String[] flist = fileList;
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setTitle("Choose your File:");
+        builder.setItems(fileList, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int index) {
+                String chosenFile = flist[index];
+                FileHandler fh = new FileHandler(getApplicationContext());
+                String fileC = fh.openFile(chosenFile);
+                activeFile = chosenFile;
+
+                TextView fileMenu = (TextView) findViewById(R.id.filename_text);
+                fileMenu.setText("File Name: " + chosenFile);
+
+                CodeFragment.cursorPos = 0;
+
+                EditText codeView = (EditText) findViewById(R.id.textView_codeView);
+                codeView.setText(fileC);
+            }
+        });
+        builder.show();
+    }
+
+    public void filenameBox(String text) {
+        LayoutInflater li = LayoutInflater.from(getApplicationContext());
+        final View promptView = li.inflate(R.layout.file_dialog, null);
+
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setView(promptView);
+
+        final EditText userInput = (EditText) promptView.findViewById(R.id.filename_input);
+        alertDialogBuilder.setCancelable(false).setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                EditText codeView = (EditText) findViewById(R.id.textView_codeView);
+                FileHandler fh = new FileHandler(getApplicationContext());
+                fh.saveFile(codeView.getText().toString(), userInput.getText().toString() + ".txt");
+                activeFile = userInput.getText().toString() + ".txt";
+
+                TextView fileMenu = (TextView) findViewById(R.id.filename_text);
+                fileMenu.setText("File Name: " + userInput.getText().toString() + ".txt");
+
+                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(userInput.getWindowToken(), 0);
+            }
+        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog,int id) {
+                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(userInput.getWindowToken(), 0);
+                dialog.cancel();
+            }
+        });
+
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
     }
 
 
@@ -75,7 +174,12 @@ public class CodeActivity extends ActionBarActivity {
 
         final String TAG = getClass().getSimpleName();
 
-        TextView codeView;
+        static int cursorPos = 0;
+
+        boolean leftHeld = false;
+        boolean rightHeld = false;
+
+        EditText codeView;
         Button buttonLeft, buttonRight,
                 buttonIncrement, buttonDecrement,
                 buttonStartBracket, buttonStopBracket,
@@ -87,10 +191,16 @@ public class CodeActivity extends ActionBarActivity {
         }
 
         @Override
+        public void onActivityCreated(Bundle savedInstanceState) {
+            super.onActivityCreated(savedInstanceState);
+
+        }
+
+        @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_code, container, false);
-            codeView = (TextView) rootView.findViewById(R.id.textView_codeView);
+            codeView = (EditText) rootView.findViewById(R.id.textView_codeView);
             buttonLeft = (Button) rootView.findViewById(R.id.button_left);
             buttonRight = (Button) rootView.findViewById(R.id.button_right);
             buttonIncrement = (Button) rootView.findViewById(R.id.button_increment);
@@ -105,6 +215,15 @@ public class CodeActivity extends ActionBarActivity {
             buttonMoveCursorRight = (Button) rootView.findViewById(R.id.button_move_right);
             buttonNext = (Button) rootView.findViewById(R.id.button_next);
             buttonPaste = (Button) rootView.findViewById(R.id.button_paste);
+
+            //This purposefully doesn't do anything, it hopefully will stop the keyboard from popping up
+            View.OnTouchListener otl = new View.OnTouchListener() {
+                public boolean onTouch(View v, MotionEvent event) {
+                    return true;
+                }
+            };
+
+            codeView.setOnTouchListener(otl);
 
             buttonLeft.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -190,6 +309,41 @@ public class CodeActivity extends ActionBarActivity {
                 }
             });
 
+            //Hold support later
+            /*buttonMoveCursorLeft.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    switch(event.getAction()) {
+                        case MotionEvent.ACTION_DOWN:
+                            leftHeld = true;
+
+                            return false;
+                        case MotionEvent.ACTION_UP:
+                            leftHeld = false;
+                            return false;
+                    }
+                    return false;
+                }
+            });*/
+
+            /*buttonMoveCursorRight.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    switch(event.getAction()) {
+                        case MotionEvent.ACTION_DOWN:
+                            rightHeld = true;
+                            while(leftHeld) {
+                                moveCursor(Constants.Direction.RIGHT);
+                            }
+                            return true;
+                        case MotionEvent.ACTION_UP:
+                            rightHeld = false;
+                            return true;
+                    }
+                    return false;
+                }
+            });*/
+
             buttonPaste.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -229,55 +383,51 @@ public class CodeActivity extends ActionBarActivity {
 
         private void insertAtCursor(char token) {
             String currentCode = codeView.getText().toString();
-            int cursorPos = currentCode.indexOf(Constants.cursor);
-            String preString = currentCode.substring(0, cursorPos);
-            String postString = currentCode.substring(cursorPos);
+            String preString;
+            try {
+                preString = currentCode.substring(0, cursorPos);
+            } catch(Exception e) {
+                preString = "";
+            }
+            String postString;
+            try {
+                postString = currentCode.substring(cursorPos, codeView.length());
+            } catch (Exception e) {
+                postString = "";
+            }
             currentCode = preString + token + postString;
+            Log.d("Brainfuck", "Text: '" + currentCode + "' Cursor: " + cursorPos);
             codeView.setText(currentCode);
+            cursorPos++;
+
+            codeView.setSelection(cursorPos);
         }
 
         private void moveCursor(Constants.Direction direction) {
-            String currentCode = codeView.getText().toString();
-            int cursorPos = currentCode.indexOf(Constants.cursor);
-            String preString = currentCode.substring(0, cursorPos);
-            String postString;
-            if (currentCode.indexOf(Constants.cursor) == currentCode.length() - 1) {
-                postString = "";
-            } else {
-                postString = currentCode.substring(cursorPos + 1);
+            if (direction == Constants.Direction.LEFT && cursorPos != 0) {
+                cursorPos--;
+                codeView.setSelection(cursorPos);
+            } else if (direction == Constants.Direction.RIGHT && codeView.getText().length() != cursorPos) {
+                cursorPos++;
+                codeView.setSelection(cursorPos);
             }
-            if (direction == Constants.Direction.LEFT) {
-                int preStringLen = preString.length();
-                if (preStringLen == 0) return;
-                char last = preString.charAt(preStringLen - 1);
-                preString = preString.substring(0, preStringLen - 1);
-                postString = last + postString;
-            } else if (direction == Constants.Direction.RIGHT) {
-                int postStringLen = postString.length();
-                if (postStringLen == 0) return;
-                char first = postString.charAt(0);
-                postString = postString.substring(1);
-                preString = preString + first;
-            }
-            currentCode = preString + '|' + postString;
-            codeView.setText(currentCode);
         }
 
         private void backSpace(){
-            String currentCode = codeView.getText().toString();
-            int cursorPos = currentCode.indexOf(Constants.cursor);
-            String preString = currentCode.substring(0, cursorPos);
-            int preStringLen = preString.length();
-            if (preStringLen == 0) return;
-            String postString;
-            if (currentCode.indexOf(Constants.cursor) == currentCode.length() - 1) {
-                postString = "";
-            } else {
-                postString = currentCode.substring(cursorPos + 1);
+            if(cursorPos != 0) {
+                String currentCode = codeView.getText().toString();
+                cursorPos--;
+                String preString = currentCode.substring(0, cursorPos);
+                String postString;
+                try {
+                    postString = currentCode.substring(cursorPos + 1, codeView.length());
+                } catch (Exception e) {
+                    postString = "";
+                }
+                currentCode = preString + postString;
+                codeView.setText(currentCode);
+                codeView.setSelection(cursorPos);
             }
-            preString = preString.substring(0, preStringLen - 1);
-            currentCode = preString + '|' + postString;
-            codeView.setText(currentCode);
         }
 
         private String pureCode(String rawCode) {
