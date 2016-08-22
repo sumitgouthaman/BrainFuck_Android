@@ -26,12 +26,12 @@
     <string name="input">Input</string>
     <string name="output">Output</string>
     <string name="title_activity_about">About</string>
-    <string name="author">Author</string>
-    <string name="author_val">Sumit Gouthaman</string>
+    <string name="author">Authors</string>
+    <string name="author_val">Sumit Gouthaman &amp; David Baines</string>
     <string name="contact">Contact</string>
-    <string name="contact_val">\@sumitgouthaman\nhttp://twitter.com/sumitgouthaman</string>
+    <string name="contact_val">Sumit Gouthaman\nhttp://twitter.com/sumitgouthaman\nsumitgt007@gmail.com\n\nDavid Baines\ndavid.peter.baines@gmail.com</string>
     <string name="other_projects">Other Projects</string>
-    <string name="other_projects_val">http://github.com/sumitgouthaman</string>
+    <string name="other_projects_val">http://github.com/sumitgouthaman\nhttps://github.com/darkrai9292</string>
     <string name="ran_out_of_input">Ran out of inputs!</string>
     <string name="ran_past_start_of_tape">Ran past start of tape!</string>
     <string name="ran_past_end_of_tape">Ran past end of tape! (max length: 30000)</string>
